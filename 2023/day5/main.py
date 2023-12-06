@@ -1,67 +1,51 @@
 from pathlib import Path
+import time
 
-with open(Path(__file__).parent / "test") as file:
+with open(Path(__file__).parent / "data") as file:
     # Seeds
-    seeds = list(map(int, file.readline().rstrip('\n').split()[1:]))
+    line = file.readline().rstrip('\n').split(':')
+    seeds = tuple(map(int, line[1].split()))
     file.readline()
 
-    print(f"Seeds: {seeds}")
+    print(f"seeds: {seeds}")
 
-    # Seed to soil
-    file.readline()
-    seed_to_soil = []
-    while (line := file.readline()) != '\n':
-        seed_to_soil.append(tuple(map(int, line.rstrip('\n').split())))
+    almanac = {}
+    while True:
+        label = file.readline().rstrip('\n').split()[0]
+        almanac[label] = []
+        while (line := file.readline()) and line != '\n':
+            almanac[label].append(tuple(map(int, line.rstrip('\n').split())))
 
-    print(f"Seed to soil: {seed_to_soil}")
-
-    # Soil to fertilizer
-    file.readline()
-    soil_to_fertilizer = []
-    while (line := file.readline()) != '\n':
-        soil_to_fertilizer.append(tuple(map(int, line.rstrip('\n').split())))
-
-    print(f"Soil to fertilizer: {soil_to_fertilizer}")
-        
-    # Fertilizer to water
-    file.readline()
-    fertilizer_to_water = []
-    while (line := file.readline()) != '\n':
-        fertilizer_to_water.append(tuple(map(int, line.rstrip('\n').split())))
-
-    print(f"Fertilizer to water: {fertilizer_to_water}")
-
-    # Water to light
-    file.readline()
-    water_to_light = []
-    while (line := file.readline()) != '\n':
-        water_to_light.append(tuple(map(int, line.rstrip('\n').split())))
-
-    print(f"Water to light: {water_to_light}")
-
-    # Light to temperature
-    file.readline()
-    light_to_temperature = []
-    while (line := file.readline()) != '\n':
-        light_to_temperature.append(tuple(map(int, line.rstrip('\n').split())))
-
-    print(f"Light to temperature: {light_to_temperature}")
-
-    # Temperature to humidity
-    file.readline()
-    temperature_to_humidity = []
-    while (line := file.readline()) != '\n':
-        temperature_to_humidity.append(tuple(map(int, line.rstrip('\n').split())))
-
-    print(f"Temperature to humidity: {temperature_to_humidity}")
-
-    # Humidity to location
-    file.readline()
-    humidity_to_location = []
-    while (line := file.readline()) != '' :
-        humidity_to_location.append(tuple(map(int, line.rstrip('\n').split())))
-
-    print(f"Humidity to location: {humidity_to_location}")
-
+        almanac[label].sort(key=lambda x: x[1])
+        print(f"{label}:")
+        for val in almanac[label]:
+            print(f"\t{val[0]:010} {val[1]:010} {val[2]:010}")
+        if not line:
+            break
     
+    def search_almanac_mapping(mapping, index):
+        for value in mapping:
+            if index < value[1]:
+                break
+            elif index <= value[1] + value[2] - 1:
+                return index + value[0] - value[1]
+        return index
+
+    start_time = time.time()
+
+    seed_to_location = []
+    for index in seeds:
+        seed = index
+        print(f"Seed: {seed}")
+        for name, mapping in almanac.items():
+            index = search_almanac_mapping(mapping, index)
+            print(f"\t{name}: {index:03}")
+        seed_to_location.append((seed, index))
+    
+    print(f"Time: {(((time.time() - start_time) / len(seeds)) * 1176123349) / 1000}")
+
+    for mapping in sorted(seed_to_location, key=lambda x: x[1], reverse=True):
+        print(f"Location: {mapping[1]}, Seed: {mapping[0]}")
+
+    print(f"Lowest Location Number: {min(seed_to_location, key=lambda x: x[1])}")
         
