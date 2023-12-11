@@ -1,10 +1,10 @@
 from pathlib import Path
 import time
 
-with open(Path(__file__).parent / "data") as file:
+with open(Path(__file__).parent / "test") as file:
     # Seeds
     line = file.readline().rstrip('\n').split(':')
-    seeds = tuple(map(int, line[1].split()))
+    seeds = list(map(int, line[1].split()))
     file.readline()
 
     print(f"seeds: {seeds}")
